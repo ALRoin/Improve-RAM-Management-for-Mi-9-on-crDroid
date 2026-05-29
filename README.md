@@ -1,20 +1,30 @@
-1. If you experience lag while playing heavy games,
-try lowering these values in system.prop:
-ro.lmk.psi_complete_stall_ms=xxx
-ro.lmk.psi_partial_stall_ms=xxx
+# Improve-RAM-Management-for-Mi-9-on-crDroid
 
-To prevent apps from reloading too often:
-`ro.lmk.psi_complete_stall_ms` is better not set lower than 700.
-And `ro.lmk.psi_partial_stall_ms` is better not set lower than 200.
+## What This Module Does
 
-Example 1:
-ro.lmk.psi_complete_stall_ms=800
-ro.lmk.psi_partial_stall_ms=400
+### Modify Virtual Memory settings
 
-Example 2:
-ro.lmk.psi_complete_stall_ms=700
-ro.lmk.psi_partial_stall_ms=200
+```sh
+echo 20 > /proc/sys/vm/dirty_ratio
+echo 10 > /proc/sys/vm/dirty_background_ratio
+echo 81920 > /proc/sys/vm/min_free_kbytes
+echo 60 > /proc/sys/vm/swappiness
+echo 100 > /proc/sys/vm/vfs_cache_pressure
+echo 150 > /proc/sys/vm/watermark_scale_factor
+```
 
-2. You can edit the ZRAM size using the action button or through the WebUI.
-I recommend setting the ZRAM size to 2.5 GB. I think it performs better.
-If you want it higher or lower, that's fine too, you can adjust it based on your needs.
+### Customize How Low Memory Killer Daemon (LMKD) Works
+
+```properties
+ro.lmk.psi_complete_stall_ms=900
+ro.lmk.psi_partial_stall_ms=500
+ro.lmk.kill_heaviest_task=false
+ro.lmk.use_psi=true
+ro.lmk.use_minfree_levels=false
+ro.lmk.swap_util_max=100
+ro.lmk.thrashing_limit=100
+ro.lmk.thrashing_limit_decay=50
+ro.lmk.swap_free_low_percentage=10
+```
+
+### Change ZRAM size
