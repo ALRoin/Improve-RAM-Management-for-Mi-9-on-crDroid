@@ -2,7 +2,7 @@
 
 ## What This Module Does
 
-### Virtual Memory Tweaks
+### Modify Virtual Memory settings
 
 ```sh
 echo 20 > /proc/sys/vm/dirty_ratio
@@ -13,7 +13,7 @@ echo 100 > /proc/sys/vm/vfs_cache_pressure
 echo 150 > /proc/sys/vm/watermark_scale_factor
 ```
 
-### Low Memory Killer Daemon (LMKD) Tweaks
+### Customize How Low Memory Killer Daemon (LMKD) Works
 
 ```properties
 ro.lmk.psi_complete_stall_ms=900
