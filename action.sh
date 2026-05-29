@@ -18,29 +18,31 @@ check_key() {
 
 get_name() {
   case $1 in
-    1) echo "3 GB";;
-    2) echo "3.5 GB";;
-    3) echo "4 GB";;
-    4) echo "4.5 GB";;
-    5) echo "5 GB";;
-    6) echo "5.5 GB";;
-    7) echo "6 GB";;
+    1) echo "2.5 GB";;
+    2) echo "3 GB";;
+    3) echo "3.5 GB";;
+    4) echo "4 GB";;
+    5) echo "4.5 GB";;
+    6) echo "5 GB";;
+    7) echo "5.5 GB";;
+    8) echo "6 GB";;
   esac
 }
 
 get_bytes() {
   case $1 in
-    1) echo "3221225472";;
-    2) echo "3758096384";;
-    3) echo "4294967296";;
-    4) echo "4831838208";;
-    5) echo "5368709120";;
-    6) echo "5905580032";;
-    7) echo "6442450944";;
+    1) echo "2684354560";;
+    2) echo "3221225472";;
+    3) echo "3758096384";;
+    4) echo "4294967296";;
+    5) echo "4831838208";;
+    6) echo "5368709120";;
+    7) echo "5905580032";;
+    8) echo "6442450944";;
   esac
 }
 
-MAX_ITEMS=7
+MAX_ITEMS=8
 
 echo "----------------------------------"
 echo "      ZRAM SIZE CHANGER           "
@@ -51,7 +53,7 @@ while [ $i -le $MAX_ITEMS ]; do
   echo "  - $(get_name $i)"
   i=$((i + 1))
 done
-echo ""
+echo " I RECOMMEND CHOOSING 2.5 GB "
 echo " PRESS VOLUME DOWN TO BEGIN SETUP "
 echo "----------------------------------"
 
