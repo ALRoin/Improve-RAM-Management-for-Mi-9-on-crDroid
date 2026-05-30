@@ -1,5 +1,7 @@
-# Improve-RAM-Management-for-Mi-9-on-crDroid
+# Improve RAM Management for Mi 9 on crDroid
+> ⚠️ **IMPORTANT:** This module is designed specifically for the **Xiaomi Mi 9 running crDroid**. Don't expect the same functionality, performance, or results on other devices or ROMs.
 
+> 
 ## What This Module Does
 
 ### Modify Virtual Memory settings
