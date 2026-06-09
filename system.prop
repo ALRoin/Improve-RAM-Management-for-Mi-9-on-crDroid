@@ -1,5 +1,5 @@
-ro.lmk.psi_complete_stall_ms=900
-ro.lmk.psi_partial_stall_ms=500
+ro.lmk.psi_complete_stall_ms=800
+ro.lmk.psi_partial_stall_ms=300
 ro.lmk.kill_heaviest_task=false
 ro.lmk.use_psi=true
 ro.lmk.use_minfree_levels=false

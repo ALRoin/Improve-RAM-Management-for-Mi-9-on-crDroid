@@ -1,8 +1,35 @@
 #!/system/bin/sh
 
-# Set paths for action.sh
 MODDIR="${0%/*}"
 CONF_FILE="$MODDIR/zram_size.conf"
+
+# 1. Detect Total RAM in KB and convert to MB
+TOTAL_RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+
+if [ -z "$TOTAL_RAM_KB" ]; then
+  echo "! Error: Could not detect RAM size."
+  exit 1
+fi
+
+TOTAL_RAM_MB=$((TOTAL_RAM_KB / 1024))
+
+# 2. Calculate KB for each percentage
+KB_30=$((TOTAL_RAM_KB * 30 / 100))
+KB_40=$((TOTAL_RAM_KB * 40 / 100))
+KB_50=$((TOTAL_RAM_KB * 50 / 100))
+KB_70=$((TOTAL_RAM_KB * 70 / 100))
+
+# 3. Calculate MB
+MB_30=$((KB_30 / 1024))
+MB_40=$((KB_40 / 1024))
+MB_50=$((KB_50 / 1024))
+MB_70=$((KB_70 / 1024))
+
+# 4. Calculate final Bytes for the config file
+BYTES_30=$((KB_30 * 1024))
+BYTES_40=$((KB_40 * 1024))
+BYTES_50=$((KB_50 * 1024))
+BYTES_70=$((KB_70 * 1024))
 
 check_key() {
   local delay=${1:-10}
@@ -18,42 +45,36 @@ check_key() {
 
 get_name() {
   case $1 in
-    1) echo "2.5 GB";;
-    2) echo "3 GB";;
-    3) echo "3.5 GB";;
-    4) echo "4 GB";;
-    5) echo "4.5 GB";;
-    6) echo "5 GB";;
-    7) echo "5.5 GB";;
-    8) echo "6 GB";;
+    1) echo "30% (${MB_30} MB)";;
+    2) echo "40% (${MB_40} MB)";;
+    3) echo "50% (${MB_50} MB)";;
+    4) echo "70% (${MB_70} MB)";;
   esac
 }
 
 get_bytes() {
   case $1 in
-    1) echo "2684354560";;
-    2) echo "3221225472";;
-    3) echo "3758096384";;
-    4) echo "4294967296";;
-    5) echo "4831838208";;
-    6) echo "5368709120";;
-    7) echo "5905580032";;
-    8) echo "6442450944";;
+    1) echo "$BYTES_30";;
+    2) echo "$BYTES_40";;
+    3) echo "$BYTES_50";;
+    4) echo "$BYTES_70";;
   esac
 }
 
-MAX_ITEMS=8
+MAX_ITEMS=4
 
-echo "----------------------------------"
-echo "      ZRAM SIZE CHANGER           "
-echo "----------------------------------"
+echo "----------------------------------------"
+echo "         ZRAM SIZE CHANGER              "
+echo "----------------------------------------"
+echo " Detected Total RAM: ${TOTAL_RAM_MB} MB "
+echo "----------------------------------------"
 echo "Available sizes:"
 i=1
 while [ $i -le $MAX_ITEMS ]; do
-  echo "  - $(get_name $i)"
+  echo "  - Choice $i: $(get_name $i)"
   i=$((i + 1))
 done
-echo " I RECOMMEND CHOOSING 2.5 GB "
+echo "----------------------------------"
 echo " PRESS VOLUME DOWN TO BEGIN SETUP "
 echo "----------------------------------"
 
@@ -97,5 +118,5 @@ done
 # Save selection to config file
 echo "$SELECTED_BYTES" > "$CONF_FILE"
 
-echo "- Done! ZRAM is now $SELECTED_NAME. Reboot the phone to apply the changes."
+echo "- Done! ZRAM is now set to $SELECTED_NAME. Reboot the phone to apply the changes."
 rm -f /dev/events_temp
