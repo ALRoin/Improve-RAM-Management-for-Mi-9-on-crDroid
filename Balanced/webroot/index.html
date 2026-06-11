@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAM Management Tweaks</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 16px;
+      margin: 0;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+    p.desc {
+      font-size: 0.9rem;
+      color: #aaaaaa;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    select, textarea, button {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      background: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+    }
+    select:focus, textarea:focus {
+      outline: none;
+      border-color: #007acc;
+    }
+    textarea {
+      height: 350px;
+      font-family: monospace;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    button {
+      background: #007acc;
+      color: white;
+      border: none;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:active {
+      background: #005f9e;
+    }
+    button:disabled {
+      background: #444444;
+      color: #888888;
+      cursor: not-allowed;
+    }
+    
+    /* Custom Styles for README button and container */
+    #readmeBtn {
+      background: #4caf50;
+      margin-bottom: 16px;
+    }
+    #readmeBtn:active {
+      background: #388e3c;
+    }
+    #readmeContent {
+      display: none;
+      background: #1e1e1e;
+      padding: 16px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    #status {
+      font-size: 0.9rem;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 500;
+      min-height: 20px;
+    }
+    #debug {
+      font-size: 0.8rem;
+      color: #bbbbbb;
+      margin-top: 8px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 200px;
+      overflow: auto;
+      border-top: 1px solid #333;
+      padding-top: 8px;
+    }
+    .success { color: #4caf50; }
+    .error { color: #f44336; }
+    .info { color: #2196f3; }
+  </style>
+</head>
+<body>
+
+  <h2>Module Configuration</h2>
+  <p class="desc">
+    Edit your module scripts here.<br>
+    &bull; Changes to <code>boot-completed.sh</code> are applied immediately.<br>
+    &bull; Changes to <code>zram_size.conf</code> require a reboot to take effect.<br>
+    &bull; Changes to <code>system.prop</code> require a reboot to take effect.
+  </p>
+
+  <button id="readmeBtn">View README.md</button>
+  <div id="readmeContent"></div>
+
+  <select id="fileSelector">
+    <option value="zram_size.conf">zram_size.conf (ZRAM Size in Bytes)</option>
+    <option value="system.prop">system.prop (LMK Properties)</option>
+    <option value="boot-completed.sh">boot-completed.sh (VM Tweaks)</option>
+  </select>
+
+  <textarea id="editor" spellcheck="false" placeholder="Loading file..."></textarea>
+
+  <button id="saveBtn">Save Changes</button>
+  <div id="status"></div>
+  <div id="debug"></div>
+
+  <script>
+    const MOD_DIR = "/data/adb/modules/improve_ram";
+
+    const fileSelector = document.getElementById('fileSelector');
+    const editor = document.getElementById('editor');
+    const saveBtn = document.getElementById('saveBtn');
+    const readmeBtn = document.getElementById('readmeBtn');
+    const readmeContent = document.getElementById('readmeContent');
+    const statusDiv = document.getElementById('status');
+    const debugDiv = document.getElementById('debug');
+
+    function debug(msg) {
+      debugDiv.textContent += msg + "\n";
+      debugDiv.scrollTop = debugDiv.scrollHeight;
+    }
+
+    function showStatus(msg, type = 'info') {
+      statusDiv.textContent = msg;
+      statusDiv.className = type;
+      setTimeout(() => {
+        if (statusDiv.textContent === msg) {
+          statusDiv.textContent = '';
+          statusDiv.className = '';
+        }
+      }, 6000);
+    }
+
+    async function execCmd(cmd) {
+      debug("CMD: " + cmd);
+      if (!window.ksu || typeof window.ksu.exec !== 'function') {
+        return { ok: false, stdout: "", stderr: "KernelSU API not available", errno: 1 };
+      }
+      try {
+        const res = await window.ksu.exec(cmd);
+        let stdout = "";
+        if (typeof res === "string") {
+          stdout = res;
+        } else if (res && typeof res === "object") {
+          stdout = res.stdout || "";
+        }
+        debug("OUT (first 200): " + stdout.slice(0, 200));
+        return { ok: true, stdout };
+      } catch (e) {
+        debug("EX: " + e);
+        return { ok: false, stdout: "", stderr: String(e) };
+      }
+    }
+
+    // Toggle and load README.md
+    readmeBtn.addEventListener('click', async () => {
+      if (readmeContent.style.display === 'block') {
+        readmeContent.style.display = 'none';
+        readmeBtn.textContent = 'View README.md';
+        return;
+      }
+
+      readmeBtn.textContent = 'Loading README...';
+      const fullPath = `${MOD_DIR}/README.md`;
+      const res = await execCmd(`base64 -w 0 "${fullPath}" 2>&1`);
+
+      if (res.ok && res.stdout.length > 0) {
+        const b64 = res.stdout.replace(/\s+/g, "");
+        try {
+          const binary = atob(b64);
+          readmeContent.textContent = decodeURIComponent(escape(binary));
+          readmeContent.style.display = 'block';
+          readmeBtn.textContent = 'Hide README.md';
+        } catch (e) {
+          showStatus("Failed to decode README", "error");
+          readmeBtn.textContent = 'View README.md';
+        }
+      } else {
+        showStatus("Failed to load README.md", "error");
+        readmeBtn.textContent = 'View README.md';
+      }
+    });
+
+    async function loadFile() {
+      editor.value = "Loading...";
+      editor.disabled = true;
+      saveBtn.disabled = true;
+      debugDiv.textContent = "";
+      debug("=== loadFile ===");
+
+      const fileName = fileSelector.value;
+      const fullPath = `${MOD_DIR}/${fileName}`;
+      debug("Path: " + fullPath);
+
+      const res = await execCmd(`base64 -w 0 "${fullPath}" 2>&1`);
+      if (!res.ok || res.stdout.length === 0) {
+        editor.value = "";
+        showStatus("Failed to load " + fileName, "error");
+        editor.disabled = false;
+        saveBtn.disabled = false;
+        return;
+      }
+
+      const b64 = res.stdout.replace(/\s+/g, "");
+      debug("base64: " + b64);
+
+      try {
+        const binary = atob(b64);
+        const content = decodeURIComponent(escape(binary));
+        editor.value = content;
+        debug("Decoded length: " + content.length);
+        showStatus("Loaded " + fileName, "info");
+      } catch (e) {
+        editor.value = "";
+        showStatus("Decode error: " + e, "error");
+      }
+
+      editor.disabled = false;
+      saveBtn.disabled = false;
+    }
+
+    async function saveFile() {
+      const fileName = fileSelector.value;
+      const content = editor.value;
+      const fullPath = `${MOD_DIR}/${fileName}`;
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+      editor.disabled = true;
+      debugDiv.textContent += "=== saveFile ===\n";
+
+      const base64Content = btoa(unescape(encodeURIComponent(content)));
+      debug("Base64: " + base64Content);
+
+      const writeCmd = `echo "${base64Content}" | base64 -d > "${fullPath}"`;
+      const writeRes = await execCmd(writeCmd);
+
+      if (fileName === "boot-completed.sh") {
+        await execCmd(`chmod +x "${fullPath}"`);
+        showStatus("Saved. Applying tweaks immediately...", "info");
+        
+        // Executes script in background AND passes "skip_sleep" argument
+        const runRes = await execCmd(`sh "${fullPath}" skip_sleep > /dev/null 2>&1 &`);
+        
+        if (runRes.ok) {
+          showStatus("Saved and applied immediately! ✓", "success");
+        } else {
+          showStatus("Saved, but execution failed", "error");
+        }
+      } else {
+        showStatus("Saved successfully! Reboot required to apply. ✓", "success");
+      }
+
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save Changes";
+      editor.disabled = false;
+    }
+
+    fileSelector.addEventListener('change', loadFile);
+    saveBtn.addEventListener('click', saveFile);
+
+    if (!window.ksu || typeof window.ksu.exec !== 'function') {
+      showStatus("Please open this page inside the KernelSU app.", "error");
+      editor.value = "KernelSU API not available.";
+      editor.disabled = true;
+      saveBtn.disabled = true;
+      readmeBtn.disabled = true;
+    } else {
+      loadFile();
+    }
+  </script>
+</body>
+    </html>
