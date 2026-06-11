@@ -1,11 +1,13 @@
 # A KernelSU module to Improve RAM Management for Mi 9 on crDroid
 > ⚠️ **IMPORTANT:** This module is designed specifically for the **Xiaomi Mi 9 running crDroid**. Don't expect the same functionality, performance, or results on other devices or ROMs.
 
-> 
+
+
 ## What This Module Does
 
-## BALANCED
-### Modify Virtual Memory settings
+### ⚖️BALANCED :
+Designed for better multitasking performance.
+##### Modify Virtual Memory settings
 
 ```sh
 #!/system/bin/sh
@@ -33,7 +35,7 @@ fi
 echo 100 > /proc/sys/vm/watermark_scale_factor
 ```
 
-### Customize How Low Memory Killer Daemon (LMKD) Works
+##### Customize How Low Memory Killer Daemon (LMKD) Works
 
 ```properties
 ro.lmk.psi_complete_stall_ms=800
@@ -47,11 +49,14 @@ ro.lmk.thrashing_limit_decay=50
 ro.lmk.swap_free_low_percentage=10
 ```
 
-### Change ZRAM size
+##### Change ZRAM size
 The default size is 40% of your RAM.
 
-## PERFORMANCE
-### Modify Virtual Memory settings
+---
+
+### 🚀PERFORMANCE :
+More aggressive at freeing RAM.
+##### Modify Virtual Memory settings
 
 ```sh
 #!/system/bin/sh
@@ -79,7 +84,7 @@ fi
 echo 100 > /proc/sys/vm/watermark_scale_factor
 ```
 
-### Customize How Low Memory Killer Daemon (LMKD) Works
+##### Customize How Low Memory Killer Daemon (LMKD) Works
 
 ```properties
 ro.lmk.psi_complete_stall_ms=700
@@ -93,5 +98,5 @@ ro.lmk.thrashing_limit_decay=50
 ro.lmk.swap_free_low_percentage=10
 ```
 
-### Change ZRAM size
+##### Change ZRAM size
 The default size is 30% of your RAM.
