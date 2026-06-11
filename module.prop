@@ -1,7 +1,0 @@
-id=improve_ram
-name=Improve RAM Management
-version=1.0.1
-versionCode=2
-author=Roz
-description=A module to change ZRAM size, modify virtual memory settings, and customize how LMKD works.
-updateJson=https://raw.githubusercontent.com/ALRoin/Improve-RAM-Management-for-Mi-9-on-crDroid/refs/heads/main/update_P.json
