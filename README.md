@@ -4,7 +4,7 @@
 > 
 ## What This Module Does
 
-##BALANCED
+## BALANCED
 ### Modify Virtual Memory settings
 
 ```sh
@@ -50,7 +50,7 @@ ro.lmk.swap_free_low_percentage=10
 ### Change ZRAM size
 The default size is 40% of your RAM.
 
-##PERFORMANCE
+## PERFORMANCE
 ### Modify Virtual Memory settings
 
 ```sh
