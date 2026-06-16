@@ -119,7 +119,7 @@
     &bull; Changes to <code>system.prop</code> require a reboot to take effect.
   </p>
 
-  <button id="readmeBtn">View README.md</button>
+  <button id="readmeBtn">View README</button>
   <div id="readmeContent"></div>
 
   <select id="fileSelector">
@@ -183,16 +183,16 @@
       }
     }
 
-    // Toggle and load README.md
+    // Toggle and load README
     readmeBtn.addEventListener('click', async () => {
       if (readmeContent.style.display === 'block') {
         readmeContent.style.display = 'none';
-        readmeBtn.textContent = 'View README.md';
+        readmeBtn.textContent = 'View README';
         return;
       }
 
       readmeBtn.textContent = 'Loading README...';
-      const fullPath = `${MOD_DIR}/README.md`;
+      const fullPath = `${MOD_DIR}/README`;
       const res = await execCmd(`base64 -w 0 "${fullPath}" 2>&1`);
 
       if (res.ok && res.stdout.length > 0) {
@@ -201,14 +201,14 @@
           const binary = atob(b64);
           readmeContent.textContent = decodeURIComponent(escape(binary));
           readmeContent.style.display = 'block';
-          readmeBtn.textContent = 'Hide README.md';
+          readmeBtn.textContent = 'Hide README';
         } catch (e) {
           showStatus("Failed to decode README", "error");
-          readmeBtn.textContent = 'View README.md';
+          readmeBtn.textContent = 'View README';
         }
       } else {
-        showStatus("Failed to load README.md", "error");
-        readmeBtn.textContent = 'View README.md';
+        showStatus("Failed to load README", "error");
+        readmeBtn.textContent = 'View README';
       }
     });
 
