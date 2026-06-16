@@ -43,6 +43,8 @@
       font-family: monospace;
       resize: vertical;
       line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
     }
     button {
       background: #007acc;
@@ -126,7 +128,7 @@
     <option value="boot-completed.sh">boot-completed.sh (VM Tweaks)</option>
   </select>
 
-  <textarea id="editor" spellcheck="false" placeholder="Loading file..."></textarea>
+  <textarea id="editor" spellcheck="false" placeholder="Loading file..." wrap="off"></textarea>
 
   <button id="saveBtn">Save Changes</button>
   <div id="status"></div>
@@ -145,7 +147,7 @@
 
     function debug(msg) {
       debugDiv.textContent += msg + "\n";
-      debugDiv.scrollTop = debugDiv.scrollHeight;
+      debugDiv.scrollTop = debugDiv.scrollTop;
     }
 
     function showStatus(msg, type = 'info') {
@@ -161,11 +163,12 @@
 
     async function execCmd(cmd) {
       debug("CMD: " + cmd);
-      if (!window.ksu || typeof window.ksu.exec !== 'function') {
+      const ksuProvider = window.ksu || (typeof ksu !== 'undefined' ? ksu : null);
+      if (!ksuProvider || typeof ksuProvider.exec !== 'function') {
         return { ok: false, stdout: "", stderr: "KernelSU API not available", errno: 1 };
       }
       try {
-        const res = await window.ksu.exec(cmd);
+        const res = await ksuProvider.exec(cmd);
         let stdout = "";
         if (typeof res === "string") {
           stdout = res;
@@ -287,7 +290,8 @@
     fileSelector.addEventListener('change', loadFile);
     saveBtn.addEventListener('click', saveFile);
 
-    if (!window.ksu || typeof window.ksu.exec !== 'function') {
+    const ksuProvider = window.ksu || (typeof ksu !== 'undefined' ? ksu : null);
+    if (!ksuProvider || typeof ksuProvider.exec !== 'function') {
       showStatus("Please open this page inside the KernelSU app.", "error");
       editor.value = "KernelSU API not available.";
       editor.disabled = true;
@@ -298,4 +302,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
