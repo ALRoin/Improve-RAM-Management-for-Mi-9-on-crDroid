@@ -1,0 +1,14 @@
+1. If you experience lag while playing heavy games,
+try lowering these values in system.prop:
+ro.lmk.psi_complete_stall_ms=xxx
+ro.lmk.psi_partial_stall_ms=xxx
+
+*A lower value makes the system more aggressive about freeing RAM.
+
+2. You can edit the ZRAM size using the action button or through the WebUI.
+
+3. 
+• Changes to boot-completed.sh are applied immediately.
+• Changes to zram_size.conf require a reboot to take effect.
+• Changes to system.prop require a reboot to take effect.
+  
