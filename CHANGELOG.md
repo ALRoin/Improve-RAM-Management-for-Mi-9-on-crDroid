@@ -1,3 +1,8 @@
+# v1.0.2
+* Changed ZRAM compression to ZSTD
+* Made some changes to the script
+* Made some changes to the WebUI
+  
 # v1.0.1-1
 * Minor improvements to the WebUI text editor
 
